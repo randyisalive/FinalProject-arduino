@@ -19,7 +19,7 @@ void setup()
     lcd.init();
     lcd.backlight();
     lcd.setCursor(0, 0);
-    lcd.print("Hello Rendy!");
+    lcd.print("Hello!");
     delay(2000);
     lcd.clear();
 }
