@@ -25,8 +25,9 @@ void setup()
 
 void loop()
 {
+
     float temp;
-    float tempLimit = 28.50; // set the temp limit threshold
+    float tempLimit = 80.00; // set the temp limit threshold
 
     // check if BTSerial have input (from transmitter)
     if (BTSerial.available())
@@ -48,7 +49,7 @@ void loop()
         // Piezo function, ring the piezo buzzer if temp > tempLimit
         if (temp > tempLimit)
         {
-            PiezoSound();
+            AlertDriver();
         }
         else
         {
@@ -59,7 +60,7 @@ void loop()
 }
 
 // Piezo ring sound
-void PiezoSound()
+void AlertDriver()
 {
     tone(buzzerPin, 1000); // Send 1kHz tone to buzzer
     delay(500);            // Tone on for 500ms
