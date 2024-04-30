@@ -57,9 +57,15 @@ void loop()
             digitalWrite(buzzerPin, HIGH);
         }
     }
+    else
+    {
+        lcd.setCursor(0, 0);
+        lcd.println("BT Not Connected");
+    }
 }
 
 // Piezo ring sound
+
 void AlertDriver()
 {
     tone(buzzerPin, 1000); // Send 1kHz tone to buzzer
@@ -70,4 +76,47 @@ void AlertDriver()
     delay(500);            // Tone on for 500ms
     noTone(buzzerPin);     // Stop tone
     delay(500);            // No tone for 500ms
+}
+
+float *SetTirePressureAndTiresTemperatureThreshold(tire, temp)
+{
+    static float Thresholds[2];
+    float tirePressure = tire; //
+    float tireTemp = temp;     //
+    Thresholds[0] = tirePressure;
+    Thresholds[1] = tireTemp;
+
+    return Thresholds
+}
+
+bool AnalyzeTiresPressureAndTiresTemperatureThreshold(pressure, temp, array)
+{
+    float pressureThreshold = array[0];
+    float temperatureThreshold = array[1];
+
+    if (temp > temperatureThreshold || pressure > pressureThreshold)
+    {
+        return true;
+    }
+    return false;
+}
+
+// update LCD display
+void UpdateLCDDisplay()
+{
+}
+
+String *FormattingDataDisplay(pressure, temperature)
+{
+    static String data[2];
+    data[0] = pressure;
+    data[1] = temperature;
+
+    return data;
+}
+
+void UpdateTiresPressureAndTemperatureData(const char *text, int col, int row)
+{
+    lcd.setCursor(col, row);
+    lcd.print(text);
 }

@@ -28,26 +28,39 @@ void setup()
 
 void loop()
 {
-    float ambientTemp = mlx.readAmbientTempC(); // reading ambient temp
-    float objectTemp = mlx.readObjectTempC();
-    Serial.print("Ambient = ");
-    Serial.print(mlx.readAmbientTempC());
-    Serial.print("*C\tObject = ");
-    Serial.print(mlx.readObjectTempC());
-    Serial.println("*C");
-    Serial.print("Ambient = ");
-    Serial.print(mlx.readAmbientTempF());
-    Serial.print("*F\tObject = ");
-    Serial.print(mlx.readObjectTempF());
-    Serial.println("*F");
 
-    float temp = TiresTemp(ambientTemp, objectTemp);
+    float *temps = GetObjectAndAmbientTemperature();
+
+    float temp = TiresTemp(temps[0], temps[1]);
 
     BTSerial.println(temp); // send the sensor data to BtSerial
     delay(1000);            // Add adelay to avoid spamming messages
 }
 
-float TiresTemp(float x, float y)
+// detect tires temp function
+float DetectTiresTemperature()
+{
+    float *temps = GetObjectAndAmbientTemperature();
+
+    float temp = TiresTemp(temps[0], temps[1]);
+
+    BTSerial.println(temp); // send the sensor data to BtSerial
+}
+
+// get avg of object and ambient temp
+float CalculateObjectAndAmbientTemperatures(float x, float y)
 {
     return x + y / 2;
+}
+
+// get temp data from MLX sensor
+float *GetObjectAndAmbientTemperature()
+{
+    float ambientTemp = mlx.readAmbientTempC(); // reading ambient temp
+    float objectTemp = mlx.readObjectTempC();   // reading object temp data
+    static float temperatures[2];
+    temperatures[0] = ambientTemp;
+    temperatures[1] = objectTemp;
+
+    return temperatures
 }
