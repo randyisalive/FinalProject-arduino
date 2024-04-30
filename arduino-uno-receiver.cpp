@@ -106,9 +106,8 @@ void UpdateLCDDisplay(String received)
 
 String *FormattingDataDisplay(float temperature)
 {
-    static String data[2];
-    data[0] = pressure;
-    data[1] = temperature;
+    static String data[1];
+    data[0] = temperature;
 
     return data;
 }
