@@ -1,5 +1,8 @@
+// ArduinoUno Receiver Code
+
 #include <SoftwareSerial.h>
 #include <LiquidCrystal_I2C.h>
+
 #define buzzerPin 3 // PIN 3 BUZZER
 
 SoftwareSerial BTSerial(11, 10);    // RX | TX
@@ -7,113 +10,86 @@ LiquidCrystal_I2C lcd(0x27, 16, 2); // set the LCD Display with 0x27 Address, 16
 
 void setup()
 {
-
-    // pin mode
     pinMode(buzzerPin, OUTPUT); // set the pin to output
-
-    lcd.clear(); // clear the LCD Display
+    lcd.init();                 // initialize the LCD
+    lcd.backlight();            // turn on LCD backlight
     Serial.begin(9600);
-    BTSerial.begin(38400);                                     // HC-05 default speed in AT command mode
-    Serial.println("Slave Bluetooth Device is Ready to Pair"); // tag as slave
-    lcd.init();                                                // initialize the LCD
-    lcd.backlight();                                           // turn on LCD backlight
-    lcd.setCursor(0, 0);
-    lcd.print("Hello!"); // Print hello! to greet the user
-    delay(3000);         // wait for 3 seconds
-    lcd.clear();         // clear the LCD
+    BTSerial.begin(38400); // HC-05 default speed in AT command mode
+    lcd.clear();           // clear the LCD Display
+    lcd.print("Hello!");   // Print hello! to greet the user
+    delay(3000);           // wait for 3 seconds
+    lcd.clear();           // clear the LCD
 }
 
 void loop()
 {
-
-    float temp;
-    float tempLimit = 80.00; // set the temp limit threshold
-
-    // check if BTSerial have input (from transmitter)
+    const float tempLimit = 80.00; // set the temp limit threshold
     if (BTSerial.available())
     {
         String received = BTSerial.readStringUntil('\n'); // read String receive from BTSerial
-
+        float temp = received.toFloat();                  // convert string to float data
+        if (AnalyzeTiresTemperatureThreshold(temp, SetTiresTemperatureThreshold(temp)))
+        {
+            AlertDriver();
+        }
         UpdateLCDDisplay(received); // update the LCD Display
-
-        // convert string to float data
-        temp = received.toFloat();
-
-        // Piezo function, ring the piezo buzzer if temp > tempLimit
-        AlertDriver(temp);
     }
     else
     {
+        lcd.clear();
         lcd.setCursor(0, 0);
-        lcd.println("BT Not Connected");
+        lcd.print("BT Not Connected");
     }
 }
 
-// Piezo ring sound
-
-void AlertDriver(float temp)
+void AlertDriver()
 {
-    float *threshold = SetTiresTemperatureThreshold(temp);
-    if (AnalyzeTiresTemperatureThreshold(temp, threshold))
-    {
-        tone(buzzerPin, 1000); // Send 1kHz tone to buzzer
-        delay(500);            // Tone on for 500ms
-        noTone(buzzerPin);     // Stop tone
-        delay(500);            // No tone for 500ms
-        tone(buzzerPin, 1500); // Send 1.5kHz tone to buzzer
-        delay(500);            // Tone on for 500ms
-        noTone(buzzerPin);     // Stop tone
-        delay(500);            // No tone for 500ms
-    }
-    else
-    {
-        // cut of from the buzzer
-        digitalWrite(buzzerPin, HIGH);
-    }
+    tone(buzzerPin, 1000); // Send 1kHz tone to buzzer
+    delay(500);            // Tone on for 500ms
+    noTone(buzzerPin);     // Stop tone
+    delay(500);            // No tone for 500ms
+    tone(buzzerPin, 1500); // Send 1.5kHz tone to buzzer
+    delay(500);            // Tone on for 500ms
+    noTone(buzzerPin);     // Stop tone
+    delay(500);            // No tone for 500ms
 }
 
-float *SetTiresTemperatureThreshold(float temp)
-{
-    static float Thresholds[1];
-    float tireTemp = temp; //
-    Thresholds[0] = tireTemp;
-
-    return Thresholds;
-}
-
-bool AnalyzeTiresTemperatureThreshold(float temp, float array[])
-{
-    float temperatureThreshold = array[0];
-
-    if (temp > temperatureThreshold)
-    {
-        return true;
-    }
-    return false;
-}
-
-// update LCD display
 void UpdateLCDDisplay(String received)
 {
-
-    // display temperature data to LCD
-    received.remove(received.length() - 1); // remove last string (bug)
-    UpdateTireTemperatureData("Temp: ", 0, 0);
-    UpdateTireTemperatureData(received, 0, 0);
-    UpdateTireTemperatureData((char)223, 0, 0);
-    UpdateTireTemperatureData("C", 0, 0);
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    String *formattedData = FormattingDataDisplay(received.toFloat());
+    lcd.print("Temp: ");
+    lcd.print(*formattedData);
+    lcd.write(223); // Degree symbol
+    lcd.print("C");
 }
 
 String *FormattingDataDisplay(float temperature)
 {
-    static String data[1];
-    data[0] = temperature;
-
-    return data;
+    static String formattedData[1];
+    formattedData[0] = String(temperature, 2); // Convert float to String with 2 decimal places
+    return formattedData;
 }
 
 void UpdateTireTemperatureData(const char *text, int col, int row)
 {
     lcd.setCursor(col, row);
     lcd.print(text);
+}
+
+float *SetTiresTemperatureThreshold(float temp)
+{
+    static float Thresholds[1];
+    Thresholds[0] = tempLimit; // Set the threshold limit
+    return Thresholds;
+}
+
+bool AnalyzeTiresTemperatureThreshold(float temp, float *threshold)
+{
+    if (temp > *threshold)
+    {
+        return true;
+    }
+    return false;
 }

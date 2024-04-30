@@ -1,9 +1,20 @@
+// NodeMCU Transmitter code - Tires Temperature Monitoring System
+
 #include <SoftwareSerial.h>
 #include <Wire.h>
 #include <Adafruit_MLX90614.h>
 
 SoftwareSerial BTSerial(5, 4); // RX | TX
 Adafruit_MLX90614 mlx = Adafruit_MLX90614();
+
+// Structure to hold temperature data
+struct TemperatureData
+{
+    float ambientTemp;
+    float objectTemp;
+};
+
+TemperatureData temps; // Global variable to store temperature data
 
 void setup()
 {
@@ -20,6 +31,7 @@ void setup()
         while (1)
             ;
     };
+    mlx.writeEmissivity(0.95); // set emisivity or tires
 
     Serial.print("Emissivity = ");
     Serial.println(mlx.readEmissivity());
@@ -28,39 +40,37 @@ void setup()
 
 void loop()
 {
-
-    float *temps = GetObjectAndAmbientTemperature();
-
-    float temp = TiresTemp(temps[0], temps[1]);
-
-    BTSerial.println(temp); // send the sensor data to BtSerial
-    delay(1000);            // Add adelay to avoid spamming messages
+    Serial.print("Emissivity = ");
+    Serial.println(mlx.readEmissivity());
+    Serial.println("================================================");
+    DetectTiresTemperature();
 }
 
 // detect tires temp function
-float DetectTiresTemperature()
+void DetectTiresTemperature()
 {
-    float *temps = GetObjectAndAmbientTemperature();
+    GetObjectAndAmbientTemperature();
+    // Send the sensor data to BTSerial
 
-    float temp = TiresTemp(temps[0], temps[1]);
+    Serial.print("Ambient: ");
+    Serial.print(temps.ambientTemp);
+    Serial.print("C, Object: ");
+    Serial.print(temps.objectTemp);
+    Serial.println("C");
 
-    BTSerial.println(temp); // send the sensor data to BtSerial
+    BTSerial.println(CalculateObjectAndAmbientTemperatures());
+    delay(2000); // Add a delay to avoid spamming
 }
 
 // get avg of object and ambient temp
-float CalculateObjectAndAmbientTemperatures(float x, float y)
+float CalculateObjectAndAmbientTemperatures()
 {
-    return x + y / 2;
+    return (temps.ambientTemp + temps.objectTemp) / 2.0;
 }
-
 // get temp data from MLX sensor
-float *GetObjectAndAmbientTemperature()
+// Function to update global temps variable with data from MLX sensor
+void GetObjectAndAmbientTemperature()
 {
-    float ambientTemp = mlx.readAmbientTempC(); // reading ambient temp
-    float objectTemp = mlx.readObjectTempC();   // reading object temp data
-    static float temperatures[2];
-    temperatures[0] = ambientTemp;
-    temperatures[1] = objectTemp;
-
-    return temperatures
+    temps.ambientTemp = mlx.readAmbientTempC(); // reading ambient temp
+    temps.objectTemp = mlx.readObjectTempC();   // reading object temp data
 }
