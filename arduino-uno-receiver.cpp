@@ -31,31 +31,16 @@ void loop()
 
     // check if BTSerial have input (from transmitter)
     if (BTSerial.available())
-    {                                                     // If the data is coming from Software Serial Port
+    {
         String received = BTSerial.readStringUntil('\n'); // read String receive from BTSerial
 
-        // display temperature data to LCD
-        lcd.setCursor(0, 0);
-        lcd.print("Temp: ");
-        received.remove(received.length() - 1); // remove last string (bug)
-        lcd.print(received);
-        lcd.print((char)223);     // the little square
-        lcd.print("C");           // Celcius
-        Serial.println(received); // Print received message to Serial Monitor
+        UpdateLCDDisplay(received); // update the LCD Display
 
         // convert string to float data
         temp = received.toFloat();
 
         // Piezo function, ring the piezo buzzer if temp > tempLimit
-        if (temp > tempLimit)
-        {
-            AlertDriver();
-        }
-        else
-        {
-            // cut of from the buzzer
-            digitalWrite(buzzerPin, HIGH);
-        }
+        AlertDriver(temp);
     }
     else
     {
@@ -66,35 +51,41 @@ void loop()
 
 // Piezo ring sound
 
-void AlertDriver()
+void AlertDriver(float temp)
 {
-    tone(buzzerPin, 1000); // Send 1kHz tone to buzzer
-    delay(500);            // Tone on for 500ms
-    noTone(buzzerPin);     // Stop tone
-    delay(500);            // No tone for 500ms
-    tone(buzzerPin, 1500); // Send 1.5kHz tone to buzzer
-    delay(500);            // Tone on for 500ms
-    noTone(buzzerPin);     // Stop tone
-    delay(500);            // No tone for 500ms
+    float *threshold = SetTiresTemperatureThreshold(temp);
+    if (AnalyzeTiresTemperatureThreshold(temp, threshold))
+    {
+        tone(buzzerPin, 1000); // Send 1kHz tone to buzzer
+        delay(500);            // Tone on for 500ms
+        noTone(buzzerPin);     // Stop tone
+        delay(500);            // No tone for 500ms
+        tone(buzzerPin, 1500); // Send 1.5kHz tone to buzzer
+        delay(500);            // Tone on for 500ms
+        noTone(buzzerPin);     // Stop tone
+        delay(500);            // No tone for 500ms
+    }
+    else
+    {
+        // cut of from the buzzer
+        digitalWrite(buzzerPin, HIGH);
+    }
 }
 
-float *SetTirePressureAndTiresTemperatureThreshold(tire, temp)
+float *SetTiresTemperatureThreshold(float temp)
 {
-    static float Thresholds[2];
-    float tirePressure = tire; //
-    float tireTemp = temp;     //
-    Thresholds[0] = tirePressure;
-    Thresholds[1] = tireTemp;
+    static float Thresholds[1];
+    float tireTemp = temp; //
+    Thresholds[0] = tireTemp;
 
-    return Thresholds
+    return Thresholds;
 }
 
-bool AnalyzeTiresPressureAndTiresTemperatureThreshold(pressure, temp, array)
+bool AnalyzeTiresTemperatureThreshold(float temp, float array[])
 {
-    float pressureThreshold = array[0];
-    float temperatureThreshold = array[1];
+    float temperatureThreshold = array[0];
 
-    if (temp > temperatureThreshold || pressure > pressureThreshold)
+    if (temp > temperatureThreshold)
     {
         return true;
     }
@@ -102,11 +93,18 @@ bool AnalyzeTiresPressureAndTiresTemperatureThreshold(pressure, temp, array)
 }
 
 // update LCD display
-void UpdateLCDDisplay()
+void UpdateLCDDisplay(String received)
 {
+
+    // display temperature data to LCD
+    received.remove(received.length() - 1); // remove last string (bug)
+    UpdateTireTemperatureData("Temp: ", 0, 0);
+    UpdateTireTemperatureData(received, 0, 0);
+    UpdateTireTemperatureData((char)223, 0, 0);
+    UpdateTireTemperatureData("C", 0, 0);
 }
 
-String *FormattingDataDisplay(pressure, temperature)
+String *FormattingDataDisplay(float temperature)
 {
     static String data[2];
     data[0] = pressure;
@@ -115,7 +113,7 @@ String *FormattingDataDisplay(pressure, temperature)
     return data;
 }
 
-void UpdateTiresPressureAndTemperatureData(const char *text, int col, int row)
+void UpdateTireTemperatureData(const char *text, int col, int row)
 {
     lcd.setCursor(col, row);
     lcd.print(text);
