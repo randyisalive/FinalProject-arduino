@@ -34,12 +34,6 @@ void loop()
         }
         UpdateLCDDisplay(received); // update the LCD Display
     }
-    else
-    {
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("BT Not Connected");
-    }
 }
 
 void AlertDriver()

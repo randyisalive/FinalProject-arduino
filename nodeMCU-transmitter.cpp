@@ -4,8 +4,8 @@
 #include <Wire.h>
 #include <Adafruit_MLX90614.h>
 
-SoftwareSerial BTSerial(5, 4); // RX | TX
-Adafruit_MLX90614 mlx = Adafruit_MLX90614();
+SoftwareSerial BTSerial(5, 4);               // RX | TX
+Adafruit_MLX90614 mlx = Adafruit_MLX90614(); // declaration of the sensor
 
 // Structure to hold temperature data
 struct TemperatureData
@@ -58,8 +58,8 @@ void DetectTiresTemperature()
     Serial.print(temps.objectTemp);
     Serial.println("C");
 
-    BTSerial.println(CalculateObjectAndAmbientTemperatures());
-    delay(2000); // Add a delay to avoid spamming
+    BTSerial.println(CalculateObjectAndAmbientTemperatures()); // sending the data through bluetooth
+    delay(2000);                                               // Add a delay to avoid spamming
 }
 
 // get avg of object and ambient temp
