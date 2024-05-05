@@ -2,7 +2,7 @@
 
 #include <SoftwareSerial.h>
 #include <LiquidCrystal_I2C.h>
-
+#define tempLimit 50
 #define buzzerPin 3 // PIN 3 BUZZER
 
 SoftwareSerial BTSerial(11, 10);    // RX | TX
@@ -23,14 +23,17 @@ void setup()
 
 void loop()
 {
-    const float tempLimit = 80.00; // set the temp limit threshold
     if (BTSerial.available())
     {
         String received = BTSerial.readStringUntil('\n'); // read String receive from BTSerial
         float temp = received.toFloat();                  // convert string to float data
         if (AnalyzeTiresTemperatureThreshold(temp, SetTiresTemperatureThreshold(temp)))
         {
+            lcd.clear();
+            lcd.setCursor(0, 0);
+            lcd.print("WARNING!!!");
             AlertDriver();
+            Serial.println("RING!!!!");
         }
         UpdateLCDDisplay(received); // update the LCD Display
     }
@@ -50,7 +53,8 @@ void AlertDriver()
 
 void UpdateLCDDisplay(String received)
 {
-    lcd.clear();
+
+      lcd.clear();
     lcd.setCursor(0, 0);
     String *formattedData = FormattingDataDisplay(received.toFloat());
     lcd.print("Temp: ");
