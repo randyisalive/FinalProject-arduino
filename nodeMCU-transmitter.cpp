@@ -3,9 +3,15 @@
 #include <SoftwareSerial.h>
 #include <Wire.h>
 #include <Adafruit_MLX90614.h>
+#include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>
+#define BASE_URL "http://192.168.18.186:5000"
 
 SoftwareSerial BTSerial(5, 4);               // RX | TX
 Adafruit_MLX90614 mlx = Adafruit_MLX90614(); // declaration of the sensor
+
+const char *ssid = "TANATAP COFFEE";
+const char *password = "creativecommunity";
 
 // Structure to hold temperature data
 struct TemperatureData
@@ -24,6 +30,7 @@ void setup()
     Serial.println("Master Bluetooth Device is Ready to Pair"); // print to tag the device as the master
 
     Serial.println("Adafruit MLX90614 test");
+    WifiRequest();
 
     if (!mlx.begin())
     {
@@ -44,6 +51,51 @@ void loop()
     Serial.println(mlx.readEmissivity());
     Serial.println("================================================");
     DetectTiresTemperature();
+    SendDataToWeb();
+}
+
+// add wifi request
+void WifiRequest()
+{
+    WiFi.begin(ssid, password);
+
+    while (WiFi.status() != WL_CONNECTED)
+    {
+        delay(1000);
+        Serial.println("Connecting to WiFi...");
+    }
+}
+
+void SendDataToWeb()
+{
+    if (WiFi.status() == WL_CONNECTED)
+    {
+        WiFiClient client;
+        HTTPClient http;
+        http.begin(client, BASE_URL + "/api/hello"); // Your Flask server URL
+        http.addHeader("Content-Type", "application/json");
+
+        // JSON data to send
+        String temperatureValue = String(CalculateObjectAndAmbientTemperatures());
+
+        String jsonData = "{\"sensor\":\"temperature\",\"value\":" + temperatureValue + "}";
+
+        int httpResponseCode = http.POST(jsonData);
+
+        if (httpResponseCode > 0)
+        {
+            String response = http.getString();
+            Serial.println(httpResponseCode);
+            Serial.println(response);
+        }
+        else
+        {
+            Serial.print("Error on sending POST: ");
+            Serial.println(httpResponseCode);
+        }
+
+        http.end();
+    }
 }
 
 // detect tires temp function
