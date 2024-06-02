@@ -30,5 +30,15 @@ def get():
     return jsonify(shared_data)
 
 
+@app.route("/api/send_threshold", methods=["POST", "GET"])
+def send_threshold():
+    global shared_data
+    data = request.get_json()
+    threshold = int(data.get("threshold"))
+    shared_data["threshold"] = threshold
+    print(shared_data)
+    return jsonify({"threshold": threshold})
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
