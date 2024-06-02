@@ -11,7 +11,7 @@ DebugToolbarExtension(app)
 CORS(app)
 
 
-shared_data = {}
+shared_data = {"threshold": 50}
 
 
 @app.route("/api/hello", methods=["POST", "GET"])

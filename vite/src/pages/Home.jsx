@@ -3,8 +3,10 @@ import useTempData from "../hooks/useTempData";
 import { Outlet } from "react-router-dom";
 import Loading from "./Loading";
 import DeviceCard from "../components/DeviceCard";
+import DateDisplay from "../function/DateDisplay";
 
 function Home({ isLoading, tempData }) {
+  const { day, month, year } = DateDisplay();
   return (
     <>
       {isLoading ? (
@@ -38,7 +40,7 @@ function Home({ isLoading, tempData }) {
                   height: "fit-content",
                 }}
               >
-                6 June 2024
+                {day} {month} {year}
               </span>
             </div>
           </div>
@@ -50,12 +52,12 @@ function Home({ isLoading, tempData }) {
               <span className="m-0 display-5" style={{ fontWeight: "bold" }}>
                 Rei!
               </span>
-              <span
+              {/* <span
                 className="m-0"
                 style={{ fontSize: "18px", fontWeight: "bold" }}
               >
                 {"22"}° C
-              </span>
+              </span> */}
             </div>
           </div>
           {/* this is for the device card */}
