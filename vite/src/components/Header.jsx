@@ -2,10 +2,22 @@ import React from "react";
 
 function Header() {
   return (
-    <div className="mt-3 text-center border-bottom pb-2">
-      <span className="display-6">
-        Tires Temperature Monitoring Alert System
+    <div
+      className="mt-3 d-flex gap-3 pb-2"
+      style={{ justifyContent: "space-evenly" }}
+    >
+      <div className="d-flex align-items-center">
+        <i className="pi pi-bars" style={{ fontSize: "18px" }}></i>
+      </div>
+      <span className="h5 m-0">
+        <label htmlFor="" style={{ fontWeight: "bold" }}>
+          VEHI
+        </label>
+        <label htmlFor="">CHECK</label>
       </span>
+      <div className="d-flex align-items-center">
+        <i className="pi pi-sliders-h" style={{ fontSize: "18px" }}></i>
+      </div>
     </div>
   );
 }

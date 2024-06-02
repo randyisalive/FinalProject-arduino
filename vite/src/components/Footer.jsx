@@ -1,11 +1,10 @@
-import React from "react";
 import { Link } from "react-router-dom";
 
 function Footer() {
   return (
     <>
       <div
-        className="d-flex border-top p-3 "
+        className="d-flex border-top p-3 card m-3 flex-row rounded-8"
         style={{ justifyContent: "space-evenly" }}
       >
         <div className="d-flex">

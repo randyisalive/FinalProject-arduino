@@ -21,6 +21,19 @@ function useTempData() {
     setThreshold(e.value);
     console.log(threshold);
   }
+  function onPlusThreshold() {
+    setThreshold((prev) => prev + 1);
+    console.log(threshold);
+  }
+  function onMinsThreshold() {
+    setThreshold((prev) => prev - 1);
+    console.log(threshold);
+  }
+
+  function disableThreshold() {
+    setThreshold(0);
+    console.log(threshold);
+  }
 
   // send to server POST
   function submitForm() {
@@ -34,7 +47,7 @@ function useTempData() {
     // Correctly set the interval to run every 5 seconds
     const intervalId = setInterval(() => {
       get_data().then((data) => {
-        setTempData(data.value);
+        setTempData(data);
         setIsLoading(false);
         console.log(data);
       });
@@ -51,6 +64,10 @@ function useTempData() {
     submitForm,
     threshold,
     toast,
+    onMinsThreshold,
+    onPlusThreshold,
+    disableThreshold,
+    setThreshold,
   };
 }
 

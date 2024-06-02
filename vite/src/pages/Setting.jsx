@@ -9,8 +9,8 @@ function Setting() {
   return (
     <>
       <Toast ref={toast} />
-      <div className="d-flex mt-3 card p-2 gap-3">
-        <div className="card flex justify-content-center">
+      <div className="d-flex mt-3 flex-column mt-5 p-2 gap-3">
+        <div className=" card flex justify-content-center">
           <Slider
             value={threshold}
             step={10}
