@@ -1,6 +1,3 @@
-import useTempData from "../hooks/useTempData";
-
-import { Outlet } from "react-router-dom";
 import Loading from "./Loading";
 import DeviceCard from "../components/DeviceCard";
 import DateDisplay from "../function/DateDisplay";
