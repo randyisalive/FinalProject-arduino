@@ -5,6 +5,7 @@
 #include <Adafruit_MLX90614.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
+#include <ArduinoJson.h>
 
 SoftwareSerial BTSerial(5, 4);               // RX | TX
 Adafruit_MLX90614 mlx = Adafruit_MLX90614(); // declaration of the sensor
@@ -53,7 +54,7 @@ void loop()
     Serial.println(mlx.readEmissivity());
     Serial.println("================================================");
     DetectTiresTemperature();
-    SendDataToWeb();
+    SendTempToWeb();
 }
 
 // add wifi request
@@ -67,10 +68,37 @@ void WifiRequest()
         Serial.println("Connecting to WiFi...");
     }
 }
-void SendDataToWeb()
+
+void GetDataFromServer()
 {
-    WiFiClient client;
-    HTTPClient http;
+    if (WiFi.status() == WL_CONNECTED)
+    {
+        http.begin(client, BASE_URL + "/api/get"); // Your Flask server URL
+
+        int httpResponseCode = http.GET();
+
+        if (httpResponseCode > 0)
+        {
+            String response = http.getString();
+            Serial.println(httpResponseCode);
+            Serial.println(response);
+            BTSerial.println(response);
+        }
+        else
+        {
+            Serial.print("Error on sending POST: ");
+            Serial.println(http.errorToString(httpResponseCode).c_str()); // More descriptive error
+        }
+
+        http.end(); // Close connection
+    }
+    else
+    {
+        Serial.println("WiFi not connected");
+    }
+}
+void SendTempToWeb()
+{
 
     if (WiFi.status() == WL_CONNECTED)
     {

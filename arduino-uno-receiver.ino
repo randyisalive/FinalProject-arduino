@@ -2,6 +2,8 @@
 
 #include <SoftwareSerial.h>
 #include <LiquidCrystal_I2C.h>
+#include <ArduinoJson.h>
+
 #define tempLimit 50
 #define buzzerPin 3 // PIN 3 BUZZER
 
@@ -26,8 +28,20 @@ void loop()
     if (BTSerial.available())
     {
         String received = BTSerial.readStringUntil('\n'); // read String receive from BTSerial
-        float temp = received.toFloat();                  // convert string to float data
-        if (AnalyzeTiresTemperatureThreshold(temp, SetTiresTemperatureThreshold(temp)))
+        StaticJsonDocument<200> doc;
+        DeserializationError error = deserializeJson(doc, received);
+        float temp = doc['value'].as<float>();
+        float threshold = doc['threshold'].as<float>();
+        if (error)
+        {
+            Serial.print(F("deserializeJson() failed: "));
+            Serial.println(error.c_str());
+        }
+        else
+        {
+            // JSON parsing successful, use the doc as needed
+        }
+        if (AnalyzeTiresTemperatureThreshold(temp, threshold))
         {
             lcd.clear();
             lcd.setCursor(0, 0);
@@ -35,7 +49,7 @@ void loop()
             AlertDriver();
             Serial.println("RING!!!!");
         }
-        UpdateLCDDisplay(received); // update the LCD Display
+        UpdateLCDDisplay(temp); // update the LCD Display
     }
 }
 
@@ -54,7 +68,7 @@ void AlertDriver()
 void UpdateLCDDisplay(String received)
 {
 
-      lcd.clear();
+    lcd.clear();
     lcd.setCursor(0, 0);
     String *formattedData = FormattingDataDisplay(received.toFloat());
     lcd.print("Temp: ");
@@ -83,9 +97,17 @@ float *SetTiresTemperatureThreshold(float temp)
     return Thresholds;
 }
 
-bool AnalyzeTiresTemperatureThreshold(float temp, float *threshold)
+bool AnalyzeTiresTemperatureThreshold(float temp, float threshold)
 {
-    if (temp > *threshold)
+    if (threshold == 0)
+    {
+        return false;
+    }
+    if (temp > 1000)
+    {
+        return false;
+    }
+    if (temp > threshold)
     {
         return true;
     }

@@ -24,6 +24,7 @@ def hello():
     return jsonify({"message": "Data received", "data": value})
 
 
+# getting the data
 @app.route("/api/get", methods=["GET"])
 def get():
     global shared_data
