@@ -55,6 +55,7 @@ void loop()
     Serial.println("================================================");
     DetectTiresTemperature();
     SendTempToWeb();
+    GetDataFromServer();
 }
 
 // add wifi request
