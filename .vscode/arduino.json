@@ -1,4 +1,5 @@
 {
     "board": "esp8266:esp8266:nodemcuv2",
-    "port": "COM5"
+    "port": "COM3",
+    "sketch": "nodeMCU-transmitter.ino"
 }

@@ -74,6 +74,7 @@ void GetDataFromServer()
 {
     if (WiFi.status() == WL_CONNECTED)
     {
+
         http.begin(client, BASE_URL + "/api/get"); // Your Flask server URL
 
         int httpResponseCode = http.GET();
@@ -81,9 +82,15 @@ void GetDataFromServer()
         if (httpResponseCode > 0)
         {
             String response = http.getString();
+            StaticJsonDocument<200> doc;
+            StaticJsonDocument<200> doc_output;
+            deserializeJson(doc, response);
+            String output;
+            doc_output["value"] = doc["value"];
+            doc_output["threshold"] = doc["threshold"];
+            serializeJson(doc_output, output);
             Serial.println(httpResponseCode);
-            Serial.println(response);
-            BTSerial.println(response);
+            BTSerial.println(output);
         }
         else
         {
@@ -144,8 +151,9 @@ void DetectTiresTemperature()
     Serial.print(temps.objectTemp);
     Serial.println("C");
 
-    BTSerial.println(CalculateObjectAndAmbientTemperatures()); // sending the data through bluetooth
-    delay(2000);                                               // Add a delay to avoid spamming
+    /*     BTSerial.println(CalculateObjectAndAmbientTemperatures()); // sending the data through bluetooth
+     */
+    delay(2000); // Add a delay to avoid spamming
 }
 
 // get avg of object and ambient temp

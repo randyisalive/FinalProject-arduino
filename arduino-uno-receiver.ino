@@ -27,21 +27,21 @@ void loop()
 {
     if (BTSerial.available())
     {
-        String received = BTSerial.readStringUntil('\n'); // read String receive from BTSerial
+        String json = BTSerial.readStringUntil('\n');
         StaticJsonDocument<200> doc;
-        DeserializationError error = deserializeJson(doc, received);
-        float temp = doc['value'].as<float>();
-        float threshold = doc['threshold'].as<float>();
+        DeserializationError error = deserializeJson(doc, json);
+        Serial.println(json);
         if (error)
         {
-            Serial.print(F("deserializeJson() failed: "));
+            Serial.print("deserializeJson() failed: ");
             Serial.println(error.c_str());
+            return;
         }
-        else
-        {
-            // JSON parsing successful, use the doc as needed
-        }
-        if (AnalyzeTiresTemperatureThreshold(temp, threshold))
+
+        // Now you can use the JSON object, for example:
+        float value = doc["value"];
+        int threshold = doc["threshold"];
+        if (AnalyzeTiresTemperatureThreshold(value, threshold))
         {
             lcd.clear();
             lcd.setCursor(0, 0);
@@ -49,7 +49,8 @@ void loop()
             AlertDriver();
             Serial.println("RING!!!!");
         }
-        UpdateLCDDisplay(temp); // update the LCD Display
+        String value_string = String(value, 2);
+        UpdateLCDDisplay(value_string); // update the LCD Display
     }
 }
 

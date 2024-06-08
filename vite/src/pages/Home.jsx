@@ -47,7 +47,7 @@ function Home({ isLoading, tempData }) {
               style={{ justifyContent: "space-between" }}
             >
               <span className="m-0 display-5" style={{ fontWeight: "bold" }}>
-                Rei!
+                Rahmandi!
               </span>
               {/* <span
                 className="m-0"
